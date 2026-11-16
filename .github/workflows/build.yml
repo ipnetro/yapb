@@ -8,8 +8,6 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
   release:
-    permissions:
-      contents: write
     types: [published]
   workflow_dispatch:
 
@@ -269,6 +267,8 @@ jobs:
         run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure
 
   release:
+    permissions:
+      contents: write
     if: (github.event_name == 'push' && github.ref != 'refs/heads/winxp-mingw') || (github.event_name == 'release' && github.event.action == 'published')
     name: ${{ github.event_name == 'release' && 'release' || 'release-continuous' }}
     runs-on: ubuntu-latest
