@@ -3498,6 +3498,14 @@ TEST_CASE ("unit/behavior_team_awareness") {
   a->StartTask (TaskId::Normal, TaskPri::kNormal, kInvalidNodeIndex, 0.0f, true);
   a->team_cooldowns_.contact.invalidate ();
 
+  // individual play must not converge on teammate-reported contacts
+  cv_individual_play.Set (1);
+  bots.ReportTeamContact (Team::Terrorist, foe, foe->v.origin, 1);
+  BehaviorHook::TeamAwareness (*a);
+  CHECK (a->enemy_.last == nullptr);
+  CHECK (a->GetTaskId () == TaskId::Normal);
+  cv_individual_play.Set (0);
+
   // a live contact is investigated
   bots.ReportTeamContact (Team::Terrorist, foe, foe->v.origin, 1);
   BehaviorHook::TeamAwareness (*a);
@@ -3517,6 +3525,7 @@ TEST_CASE ("unit/behavior_team_awareness") {
   CHECK (a->enemy_.last == nullptr);
   CHECK (a->GetTaskId () != TaskId::MoveTo);
 
+  cv_individual_play.Set (0); // avoid leaking global cvar state to later scenarios
   bots.Destroy ();
 }
 
